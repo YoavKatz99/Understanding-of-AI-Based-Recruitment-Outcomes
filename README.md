@@ -1,3 +1,5 @@
+
+![תמונה1](https://github.com/user-attachments/assets/0d6429fd-8ffb-4985-997b-1c5ea58a9ebb)
 # Understanding AI-Based Recruitment Outcomes
 
 ## 📌 Project Overview
