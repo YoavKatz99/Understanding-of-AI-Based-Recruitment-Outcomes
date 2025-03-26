@@ -1,0 +1,4 @@
+
+    Elin is a Machine Learning Engineer with experience in Python, TensorFlow,
+    Keras, and AWS. She worked on computer vision projects using OpenCV and PyTorch.
+    
