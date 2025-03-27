@@ -48,8 +48,9 @@ def load_resumes_features(folder_path):
     return pd.DataFrame(data)
 
 # Paths
-resume_folder = "backend/trainResumes"
-train_csv_path = "backend/train.csv"
+resume_folder = os.path.join(os.path.dirname(__file__), "trainResumes")
+train_csv_path = os.path.join(os.path.dirname(__file__), "train.csv")
+
 
 
 # Load data
@@ -76,3 +77,7 @@ mae = mean_absolute_error(y_test, y_pred)
 print(f"✅ Model trained. MAE: {mae}")
 joblib.dump(model, "random_forest_model.pkl")
 print("✅ Model saved to random_forest_model.pkl")
+# שמירת שמות הפיצ'רים מהאימון
+with open("feature_names.txt", "w") as f:
+    for col in X.columns:
+        f.write(col + "\n")

@@ -1,0 +1,24 @@
+data science
+computer vision
+natural language processing
+ai
+ml
+machine learning
+deep learning
+logistic regression
+classification
+scikit learn
+numpy
+pandas
+matplotlib
+seaborn
+tensorflow
+keras
+pytorch
+cnn
+rnn
+nlp
+opencv
+django
+mongodb
+sql

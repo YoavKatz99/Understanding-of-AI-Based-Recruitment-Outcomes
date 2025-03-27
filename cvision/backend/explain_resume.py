@@ -1,80 +1,92 @@
-import os
-import pandas as pd
-import shap
-import lime.lime_tabular
 import joblib
-from pdfminer.high_level import extract_text
-import spacy
+import shap
+import lime
+import lime.lime_tabular
+import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import spacy
+from pdfminer.high_level import extract_text
 
-# הגדרות בסיס
-resume_path = "backend/test_resume.pdf"
-model_path = "backend/random_forest_model.pkl"
+# === הגדרות בסיסיות ===
+model_path = "random_forest_model.pkl"
+resume_path = "test_resume.pdf"
 
-# טען את המודל
-model = joblib.load(model_path)
-
-# הגדר רשימת טכנולוגיות
 TECH_SKILLS = [
-    'data science', 'computer vision', 'natural language processing', 'ai', 'ml',
-    'machine learning', 'deep learning', 'logistic regression', 'classification',
-    'scikit learn', 'numpy', 'pandas', 'matplotlib', 'seaborn', 'tensorflow',
+    'data_science', 'computer_vision', 'natural_language_processing', 'ai', 'ml',
+    'machine_learning', 'deep_learning', 'logistic_regression', 'classification',
+    'scikit_learn', 'numpy', 'pandas', 'matplotlib', 'seaborn', 'tensorflow',
     'keras', 'pytorch', 'cnn', 'rnn', 'nlp', 'opencv', 'django', 'mongodb', 'sql'
 ]
 
-# טען מודל של spaCy
+# === עיבוד טקסט וחילוץ מאפיינים ===
 nlp = spacy.load("en_core_web_sm")
-stopwords = nlp.Defaults.stop_words
 
-# פונקציית ניקוי טקסט
 def process_text(text):
     doc = nlp(text.lower())
-    return " ".join([token.lemma_ for token in doc if token.text not in stopwords])
+    return " ".join([token.lemma_ for token in doc])
 
-# המרת קובץ PDF לטקסט
+def extract_features_from_text(text):
+    text = process_text(text)
+    features = {skill: int(skill.replace('_', ' ') in text) for skill in TECH_SKILLS}
+    print("\n📊 Extracted Features:")
+    print(features)
+    return pd.DataFrame([features])
+
+# === שליפת טקסט מהקובץ ===
+print("\n📄 Extracting text from PDF...")
 text = extract_text(resume_path)
-cleaned_text = process_text(text)
+print("\n📄 Extracted Resume Text:")
+print(text)
 
-# המרת טקסט לתכונות
-features = {skill: 1 if skill in cleaned_text else 0 for skill in TECH_SKILLS}
-df_features = pd.DataFrame([features])
+# === חיזוי באמצעות המודל ===
+print("\n📦 Loading model...")
+model = joblib.load(model_path)
 
-# תחזית
-prediction = model.predict(df_features)[0]
-print(f"🔎 Match Score Prediction: {round(prediction, 2)}")
+features_df = extract_features_from_text(text)
 
-# 🔍 הסבר עם SHAP
-explainer = shap.Explainer(model, df_features)
-shap_values = explainer(df_features)
+# טען את שמות הפיצ'רים המקוריים מהאימון
+with open("feature_names.txt") as f:
+    feature_order = [line.strip() for line in f]
 
+# ודא שכל העמודות קיימות ושהסדר נכון
+for feat in feature_order:
+    if feat not in features_df.columns:
+        features_df[feat] = 0
+
+features_df = features_df[feature_order]  # סדר העמודות הנכון
+
+prediction = model.predict(features_df)[0]
+print(f"\n🔎 Match Score Prediction: {round(prediction, 2)}")
+
+# === הסבר עם SHAP ===
 print("\n📌 Top SHAP contributions:")
-shap_vals = shap_values.values[0]
-for skill, val in sorted(zip(df_features.columns, shap_vals), key=lambda x: abs(x[1]), reverse=True)[:5]:
-    print(f"{skill}: {val:.3f}")
+explainer = shap.Explainer(model, features_df)
+shap_values = explainer(features_df)
+shap_df = pd.DataFrame({
+    "feature": features_df.columns,
+    "shap_value": shap_values.values[0]
+}).sort_values(by="shap_value", ascending=False)
+print(shap_df.head())
 
-# גרף SHAP
 shap.plots.bar(shap_values[0], show=False)
-plt.title("SHAP Feature Importance")
 plt.tight_layout()
 plt.savefig("shap_importance.png")
 print("📊 SHAP plot saved to shap_importance.png")
 
-# 🔍 הסבר עם LIME
+# === הסבר עם LIME ===
+print("\n📌 Top LIME contributions:")
 lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-    training_data=df_features.values,
-    feature_names=df_features.columns.tolist(),
+    training_data=np.array(features_df),
+    feature_names=features_df.columns.tolist(),
     mode="regression"
 )
 
 lime_exp = lime_explainer.explain_instance(
-    df_features.iloc[0].values,
-    model.predict,
+    data_row=features_df.iloc[0].values,
+    predict_fn=model.predict,
     num_features=5
 )
-
-print("\n📌 Top LIME contributions:")
-for feat, weight in lime_exp.as_list():
-    print(f"{feat}: {weight:.3f}")
 
 lime_exp.save_to_file("lime_explanation.html")
 print("📄 LIME explanation saved to lime_explanation.html")
