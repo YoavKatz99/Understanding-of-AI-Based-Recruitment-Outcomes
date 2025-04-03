@@ -1,13 +1,13 @@
-data science
-computer vision
-natural language processing
+data_science
+computer_vision
+natural_language_processing
 ai
 ml
-machine learning
-deep learning
-logistic regression
+machine_learning
+deep_learning
+logistic_regression
 classification
-scikit learn
+scikit_learn
 numpy
 pandas
 matplotlib
