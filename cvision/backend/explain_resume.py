@@ -8,11 +8,6 @@ import matplotlib.pyplot as plt
 import spacy
 from pdfminer.high_level import extract_text
 
-# === הגדרות ===
-model_path = "xgboost_model.pkl"
-resume_path = "test_resume.pdf"
-feature_names_path = "feature_names.txt"
-
 TECH_SKILLS = [
     'data_science', 'computer_vision', 'natural_language_processing', 'ai', 'ml',
     'machine_learning', 'deep_learning', 'logistic_regression', 'classification',
@@ -20,7 +15,6 @@ TECH_SKILLS = [
     'keras', 'pytorch', 'cnn', 'rnn', 'nlp', 'opencv', 'django', 'mongodb', 'sql'
 ]
 
-# === עיבוד טקסט וחילוץ מאפיינים ===
 nlp = spacy.load("en_core_web_sm")
 
 def process_text(text):
@@ -30,68 +24,59 @@ def process_text(text):
 def extract_features_from_text(text):
     text = process_text(text)
     features = {skill: int(skill.replace("_", " ") in text) for skill in TECH_SKILLS}
-    print("\\n📊 Extracted Features:")
-    print(features)
     return pd.DataFrame([features])
 
-# === שליפת טקסט מהקובץ ===
-print("\\n📄 Extracting text from PDF...")
-text = extract_text(resume_path)
-print("\\n📄 Extracted Resume Text:")
-print(text)
+def run_explanation(tool,resume_path):
+    print("\n📄 Extracting text from PDF...")
+    text = extract_text(resume_path)
+    print("\n📄 Extracted Resume Text:")
+    print(text)
 
-# === חיזוי באמצעות המודל ===
-print("\\n📦 Loading model...")
-model = joblib.load(model_path)
+    print("\n📦 Loading model...")
+    model = joblib.load("xgboost_model.pkl")
 
-features_df = extract_features_from_text(text)
+    features_df = extract_features_from_text(text)
 
-# טען את שמות הפיצ'רים המקוריים מהאימון
-with open(feature_names_path) as f:
-    feature_order = [line.strip() for line in f]
+    with open("feature_names.txt") as f:
+        feature_order = [line.strip() for line in f]
 
-# ודא שכל הפיצ'רים קיימים באותו סדר
-for feat in feature_order:
-    if feat not in features_df.columns:
-        features_df[feat] = 0
+    for feat in feature_order:
+        if feat not in features_df.columns:
+            features_df[feat] = 0
+    features_df = features_df[feature_order]
 
-features_df = features_df[feature_order]
+    prediction = model.predict(features_df)[0]
+    print(f"\n🔎 Match Score Prediction: {prediction}")
 
-prediction = model.predict(features_df)[0]
-print(f"\\n🔎 Match Score Prediction: {prediction}")
+    if tool == "shap":
+        print("\n📌 Top SHAP contributions:")
+        explainer = shap.Explainer(model)
+        shap_values = explainer(features_df)
+        shap_df = pd.DataFrame({
+            "feature": features_df.columns,
+            "shap_value": shap_values.values[0]
+        }).sort_values(by="shap_value", ascending=False)
+        print(shap_df.head())
+        shap.plots.bar(shap_values[0], show=False)
+        plt.savefig("shap_importance.png")
+        plt.close()
+        print("📊 SHAP plot saved to shap_importance.png")
 
-# === הסבר עם SHAP ===
-print("\\n📌 Top SHAP contributions:")
-explainer = shap.Explainer(model)
-shap_values = explainer(features_df)
+    elif tool == "lime":
+        print("\n📌 Top LIME contributions:")
+        lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+            training_data=np.array(features_df),
+            feature_names=features_df.columns.tolist(),
+            mode="regression"
+        )
+        lime_exp = lime_explainer.explain_instance(
+            data_row=features_df.iloc[0].values,
+            predict_fn=model.predict,
+            num_features=5
+        )
+        lime_exp.save_to_file("lime_explanation.html")
+        print("📄 LIME explanation saved to lime_explanation.html")
 
-shap_df = pd.DataFrame({
-    "feature": features_df.columns,
-    "shap_value": shap_values.values[0]
-}).sort_values(by="shap_value", ascending=False)
-print(shap_df.head())
-
-shap_df[:5].plot(kind="bar", x="feature", y="shap_value", legend=False)
-plt.title("Top SHAP Contributions")
-plt.ylabel("SHAP Value")
-plt.tight_layout()
-plt.savefig("shap_importance.png")
-print("📊 SHAP plot saved to shap_importance.png")
-
-# === הסבר עם LIME ===
-print("\\n📌 Top LIME contributions:")
-lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-    training_data=np.array(features_df),
-    feature_names=features_df.columns.tolist(),
-    mode="regression",
-    discretize_continuous=False
-)
-
-lime_exp = lime_explainer.explain_instance(
-    data_row=features_df.iloc[0].values,
-    predict_fn=model.predict,
-    num_features=5
-)
-
-lime_exp.save_to_file("lime_explanation.html")
-print("📄 LIME explanation saved to lime_explanation.html")
+    
+    #return round(float(prediction), 2)
+    return {"match_score": round(float(prediction), 2)}

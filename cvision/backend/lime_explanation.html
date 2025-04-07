@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_divV7LT8R3HB1VW7CX"></div>
+        <div class="lime top_div" id="top_div4SY8VL6TM3SPF6S"></div>
         
         <script>
-        var top_div = d3.select('#top_divV7LT8R3HB1VW7CX').classed('lime top_div', true);
+        var top_div = d3.select('#top_div4SY8VL6TM3SPF6S').classed('lime top_div', true);
         
         
                     var pp_div = top_div.append('div')
                                         .classed('lime predicted_value', true);
                     var pp_svg = pp_div.append('svg').style('width', '100%');
-                    var pp = new lime.PredictedValue(pp_svg, 49.328922271728516, -4.040319442749023, 64.72444152832031);
+                    var pp = new lime.PredictedValue(pp_svg, 29.46474838256836, -3.725168228149414, 67.81733703613281);
                     
         var exp_div;
             var exp = new lime.Explanation(["negative", "positive"]);
         
             exp_div = top_div.append('div').classed('lime explanation', true);
-            exp.show([["deep_learning", 6.904471990453648], ["machine_learning", 3.8000397822190073], ["pytorch", 2.816229471718655], ["tensorflow", -1.8432306528811162], ["numpy", -1.8038308094916509]], 1, exp_div);
+            exp.show([["machine_learning", 3.288776877208838], ["deep_learning", 3.122443312239544], ["pytorch", 3.0347123513223337], ["data_science", 2.6806249269766598], ["tensorflow", -2.045302230244743]], 1, exp_div);
             
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["deep_learning", "1.00", 6.904471990453648], ["machine_learning", "1.00", 3.8000397822190073], ["pytorch", "0.00", 2.816229471718655], ["tensorflow", "1.00", -1.8432306528811162], ["numpy", "0.00", -1.8038308094916509]], 1, raw_div);
+            exp.show_raw_tabular([["machine_learning", "1.00", 3.288776877208838], ["deep_learning", "0.00", 3.122443312239544], ["pytorch", "0.00", 3.0347123513223337], ["data_science", "0.00", 2.6806249269766598], ["tensorflow", "0.00", -2.045302230244743]], 1, raw_div);
         
         </script>
         </body></html>
