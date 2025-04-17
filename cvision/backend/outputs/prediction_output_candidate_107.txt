@@ -1,0 +1,41 @@
+Predicted Match Percentage: 46.5%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 46.5%. Best improvement: add natural language processing, seaborn to reach 54.2%
+
+Potential gain: +7.7%
+
+Your Current Skills:
+- computer vision
+- machine learning
+- deep learning
+- classification
+- nlp
+- opencv
+- sql
+
+Improvement Scenarios:
+
+Scenario 1: Score improvement to 54.2%
+Add these skills:
+- natural language processing: building systems that understand and process human language
+- seaborn: statistical data visualization
+
+Scenario 2: Score improvement to 52.2%
+Add these skills:
+- data science: expertise in analyzing and interpreting complex data
+
+Scenario 3: Score improvement to 51.2%
+Add these skills:
+- natural language processing: building systems that understand and process human language
+- keras: building neural networks with Keras
+
+Scenario 4: Score improvement to 50.8%
+Add these skills:
+- seaborn: statistical data visualization
+
+Scenario 5: Score improvement to 50.8%
+Add these skills:
+- seaborn: statistical data visualization
