@@ -80,17 +80,6 @@ def run_explanation(filepath, tool):
 
     elif tool == "lime":
         print("\n📌 Top LIME contributions:")
-
-        # 🛠️ פונקציית חיזוי מותאמת ל־LIME
-        def predict_fn(x):
-            x_df = pd.DataFrame(x, columns=features_df.columns)
-            return model.predict(x_df)
-
-         # בודק האם התחזיות משתנות עבור שכפולים עם רעש
-        test_variants = features_df.values + np.random.normal(0, 0.2, size=features_df.shape)
-        print("\n🔬 תחזיות על קלטים עם רעש:")
-        print(predict_fn(test_variants))
-
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=np.array(features_df),
             feature_names=features_df.columns.tolist(),
@@ -98,11 +87,17 @@ def run_explanation(filepath, tool):
         )
         lime_exp = lime_explainer.explain_instance(
             data_row=features_df.iloc[0].values,
-            predict_fn=predict_fn,
-            num_features=23
+            predict_fn=model.predict,
+            num_features=5
         )
         lime_plot_path = os.path.join(OUTPUT_DIR, "lime_explanation.html")
         lime_exp.save_to_file(lime_plot_path)
         print(f"📄 LIME explanation saved to {lime_plot_path}")
 
+    # מחזירים מילון עם תוצאת החיזוי
     return {"prediction": round(float(prediction), 2)}
+    
+if __name__ == "__main__":
+    # להרצה לבד לצורך בדיקה
+    result = run_explanation("test_resume.pdf", "shap")
+    print(result)

@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
-
-# לצורך הדגמה בלבד (החליפי בקוד האמיתי של CARLA בהמשך)
 import matplotlib.pyplot as plt
+
+# CARLA
+from carla.models.catalog import MLModelCatalog
+from carla.recourse_methods import GrowingSpheres
+from carla.data.catalog import OnlineCatalog
 
 app = Flask(__name__)
 CORS(app)
@@ -16,31 +19,36 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 @app.route('/explain_carla', methods=['POST'])
 def explain_carla():
     try:
-        # קבלת קובץ
         file = request.files['file']
         filename = file.filename or "temp_resume.pdf"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
         print(f"📄 קובץ נשמר: {filepath}")
 
-        # כאן את מריצה את CARLA בפועל (כרגע הדמיה עם גרף)
-        print(f"🚀 מתחילה ניתוח CARLA לקובץ: {filename}")
-        
+        # ניתוח תרחיש נגד-עובדתי עם CARLA
+        print(f"🚀 התחלת ניתוח CARLA לדוגמה (נתוני adult)...")
+
+        data = OnlineCatalog("adult")
+        model = MLModelCatalog(data, model_type="ann")
+
+        # שורת קלט לדוגמה - תשתנה אחר כך למידע מקובץ קורות חיים
+        query = data.raw.iloc[[0]].copy()
+        query["age"] = 30
+        query["education"] = "Bachelors"
+
+        gs = GrowingSpheres(model, data)
+        cf = gs.get_counterfactuals(query)
+
         output_filename = f"carla_output_{filename.replace('.pdf', '')}.png"
         output_path = os.path.join(OUTPUT_FOLDER, output_filename)
 
-        # יצירת תוצאה לדוגמה
-        plt.figure()
-        plt.text(0.5, 0.5, f"CARLA result for {filename}", fontsize=14, ha='center')
-        plt.axis('off')
-        plt.savefig(output_path)
-        plt.close()
+        # שמירת התוצאה כתמונה
+        cf.visualize(path=output_path)
 
-        print(f"✅ תמונה נשמרה ב: {output_path}")
+        print(f"✅ תמונת תרחיש נשמרה: {output_path}")
 
-        # החזרת תגובה
         return jsonify({
-            "prediction": 85.0,
+            "prediction": 85.0,  # ציון פיקטיבי בינתיים
             "output_file": output_filename
         })
 
