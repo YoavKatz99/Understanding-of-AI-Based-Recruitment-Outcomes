@@ -8,6 +8,7 @@ export default function ToolSelector() {
   const [resultFile, setResultFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [outputText, setOutputText] = useState(null);
+  const [highlightedWords, setHighlightedWords] = useState([]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -28,9 +29,13 @@ export default function ToolSelector() {
     formData.append("file", file);
     formData.append("tool", tool);
 
-    const endpoint = tool === "dice"
-      ? "http://127.0.0.1:5000/explain_carla"
-      : "http://127.0.0.1:5000/explain";
+    let endpoint = "http://127.0.0.1:5000/explain";
+
+    if (tool === "dice") {
+      endpoint = "http://127.0.0.1:5000/explain_carla";
+    } else if (tool === "lime_text") {
+      endpoint = "http://127.0.0.1:5000/explain_lime_text";
+    }
 
     try {
       const response = await fetch(endpoint, {
@@ -46,8 +51,9 @@ export default function ToolSelector() {
 
         if (tool === "shap") {
           setResultFile("shap_importance.png");
-        } else if (tool === "lime") {
-          setResultFile("lime_explanation.html");
+        } else if (tool === "lime_text") {
+          setResultFile("lime_text_explanation.html");
+          setHighlightedWords(result.highlighted_words || []);
         } else if (tool === "dice") {
           setResultFile(result.output_file);
           if (result.output_text) {
@@ -91,7 +97,36 @@ export default function ToolSelector() {
           </li>
         );
       } else {
-        return <p key={index} className="my-1">{line}</p>;
+        return (
+          <p key={index} className="my-1">
+            {line}
+          </p>
+        );
+      }
+    });
+  };
+
+  const highlightResumeText = (text, highlights) => {
+    if (!text) return "";
+
+    return text.split(/\s+/).map((word, i) => {
+      const match = highlights.find((hw) =>
+        word.toLowerCase().includes(hw.word)
+      );
+      if (match) {
+        const weight = match.weight;
+        const bgColor = weight > 0 ? "bg-green-200" : "bg-red-200";
+        return (
+          <span key={i} className={`${bgColor} px-1 rounded mx-0.5`}>
+            {word}
+          </span>
+        );
+      } else {
+        return (
+          <span key={i} className="mx-0.5">
+            {word}{" "}
+          </span>
+        );
       }
     });
   };
@@ -110,17 +145,13 @@ export default function ToolSelector() {
             onChange={(e) => setTool(e.target.value)}
           >
             <option value="shap">SHAP</option>
-            <option value="lime">LIME</option>
+            <option value="lime_text">LIME (Text)</option>
             <option value="dice">DiCE</option>
           </select>
 
           <label className="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
             Upload CV
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+            <input type="file" onChange={handleFileChange} className="hidden" />
           </label>
 
           <button
@@ -133,23 +164,30 @@ export default function ToolSelector() {
         </div>
 
         {error && (
-          <p className="text-center text-red-600 text-lg font-medium mb-6">❌ Error: {error}</p>
+          <p className="text-center text-red-600 text-lg font-medium mb-6">
+            ❌ Error: {error}
+          </p>
         )}
 
         {score !== null && (
           <div className="bg-white rounded-2xl shadow-xl p-10">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-800">Match Score</h2>
-              <p className="text-6xl font-extrabold text-indigo-600 mt-2">{score.toFixed(2)}%</p>
+              <p className="text-6xl font-extrabold text-indigo-600 mt-2">
+                {score.toFixed(2)}%
+              </p>
               <p className="mt-4 text-gray-600">
-                This score reflects how well the resume aligns with the job requirements based on extracted skills.
+                This score reflects how well the resume aligns with the job
+                requirements based on extracted skills.
               </p>
             </div>
 
             <div className="mt-12 grid md:grid-cols-2 gap-8">
               {tool === "shap" && resultFile && (
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-3">SHAP Feature Importance</h3>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    SHAP Feature Importance
+                  </h3>
                   <img
                     src={`http://127.0.0.1:5000/outputs/${resultFile}`}
                     alt="SHAP Importance"
@@ -158,20 +196,28 @@ export default function ToolSelector() {
                 </div>
               )}
 
-              {tool === "lime" && resultFile && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-3">LIME Explanation</h3>
-                  <iframe
-                    src={`http://127.0.0.1:5000/outputs/${resultFile}`}
-                    className="w-full h-[600px] border rounded-xl"
-                    title="LIME Explanation"
-                  ></iframe>
+              {tool === "lime_text" && resultFile && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    LIME Explanation
+                  </h3>
+                  <div className="w-full min-h-[800px]">
+                    <iframe
+                      src={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                      title="LIME Explanation"
+                      className="w-full h-[800px] border rounded-xl shadow"
+                      style={{ width: "50%", height: "350px", border: "1px solid #ccc", borderRadius: "1rem" }}
+
+                    />
+                  </div>
                 </div>
               )}
 
               {tool === "dice" && (
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-3">DiCE Explanation</h3>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    DiCE Explanation
+                  </h3>
                   {outputText ? (
                     <div className="p-4 border rounded bg-white text-black">
                       <div className="font-mono whitespace-pre-wrap">
@@ -195,12 +241,26 @@ export default function ToolSelector() {
               )}
 
               <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
-                <h4 className="text-lg font-semibold text-indigo-700 mb-2">Interpretation Tips</h4>
+                <h4 className="text-lg font-semibold text-indigo-700 mb-2">
+                  Interpretation Tips
+                </h4>
                 <ul className="text-gray-600 list-disc pl-6 space-y-1 text-sm">
-                  <li><strong>SHAP</strong>: shows which features (skills) pushed the score up or down.</li>
-                  <li><strong>LIME</strong>: visualizes how individual features contributed to this specific prediction.</li>
-                  <li><strong>DiCE</strong>: suggests which skills to add to improve your score.</li>
-                  <li>Use insights to improve the resume (e.g., add missing keywords).</li>
+                  <li>
+                    <strong>SHAP</strong>: shows which features (skills) pushed
+                    the score up or down.
+                  </li>
+                  <li>
+                    <strong>LIME</strong>: visualizes how individual features
+                    contributed to this specific prediction.
+                  </li>
+                  <li>
+                    <strong>DiCE</strong>: suggests which skills to add to
+                    improve your score.
+                  </li>
+                  <li>
+                    Use insights to improve the resume (e.g., add missing
+                    keywords).
+                  </li>
                 </ul>
               </div>
             </div>

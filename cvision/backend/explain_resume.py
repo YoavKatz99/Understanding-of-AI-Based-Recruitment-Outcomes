@@ -78,7 +78,7 @@ def run_explanation(filepath, tool):
         plt.close()
         print(f"📊 SHAP plot saved to {shap_plot_path}")
 
-    elif tool == "lime":
+    """elif tool == "lime":
         print("\n📌 Top LIME contributions:")
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=np.array(features_df),
@@ -90,9 +90,25 @@ def run_explanation(filepath, tool):
             predict_fn=model.predict,
             num_features=5
         )
-        lime_plot_path = os.path.join(OUTPUT_DIR, "lime_explanation.html")
-        lime_exp.save_to_file(lime_plot_path)
-        print(f"📄 LIME explanation saved to {lime_plot_path}")
+
+    lime_plot_path = os.path.join(OUTPUT_DIR, "lime_explanation.html")
+    lime_exp.save_to_file(lime_plot_path)
+
+    # Extract feature importances (top skills)
+    important_words = lime_exp.as_list()
+    highlighted_words = [
+        {"word": w.replace(" ", "_"), "weight": float(weight)}
+        for w, weight in important_words
+    ]
+
+    print(f"📄 LIME explanation saved to {lime_plot_path}")
+    
+    return {
+        "prediction": round(float(prediction), 2),
+        "highlighted_words": highlighted_words,
+        "output_file": "lime_explanation.html"
+    }
+    """
 
     # מחזירים מילון עם תוצאת החיזוי
     return {"prediction": round(float(prediction), 2)}

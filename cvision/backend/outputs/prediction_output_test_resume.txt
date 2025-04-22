@@ -1,0 +1,38 @@
+Predicted Match Percentage: 29.5%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 29.5%. Best improvement: add natural language processing, deep learning to reach 53.3%
+
+Potential gain: +23.9%
+
+Your Current Skills:
+- machine learning
+
+Improvement Scenarios:
+
+Scenario 1: Score improvement to 53.3%
+Add these skills:
+- natural language processing: building systems that understand and process human language
+- deep learning: working with neural networks and deep learning architectures
+
+Scenario 2: Score improvement to 53.3%
+Add these skills:
+- natural language processing: building systems that understand and process human language
+- deep learning: working with neural networks and deep learning architectures
+
+Scenario 3: Score improvement to 53.3%
+Add these skills:
+- natural language processing: building systems that understand and process human language
+- deep learning: working with neural networks and deep learning architectures
+
+Scenario 4: Score improvement to 51.1%
+Add these skills:
+- data science: expertise in analyzing and interpreting complex data
+- natural language processing: building systems that understand and process human language
+
+Scenario 5: Score improvement to 51.1%
+Add these skills:
+- data science: expertise in analyzing and interpreting complex data
+- natural language processing: building systems that understand and process human language

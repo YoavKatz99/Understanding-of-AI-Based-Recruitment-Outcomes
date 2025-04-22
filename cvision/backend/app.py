@@ -9,6 +9,8 @@ from pdfminer.high_level import extract_text
 import dice_ml
 from dice_ml import Dice
 from explain_resume import run_explanation
+from explain_lime_text import run_text_lime_with_xgb
+
 
 app = Flask(__name__)
 CORS(app)
@@ -227,6 +229,22 @@ def explain_dice():
     except Exception as e:
         print("💥 Error in DiCE explanation:", str(e))
         return jsonify({"error": str(e)}), 500
+
+@app.route("/explain_lime_text", methods=["POST"])
+def explain_lime_text():
+    try:
+        file = request.files['file']
+        filename = file.filename or "temp_resume.pdf"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        result = run_text_lime_with_xgb(filepath)
+        return jsonify(result)
+
+    except Exception as e:
+        print("💥 Error in LIME Text explanation:", str(e))
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/outputs/<path:filename>")
 def outputs(filename):
