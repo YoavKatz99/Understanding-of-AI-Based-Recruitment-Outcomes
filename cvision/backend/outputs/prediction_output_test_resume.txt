@@ -3,37 +3,40 @@ Predicted Match Percentage: 29.5%
 COUNTERFACTUAL EXPLANATIONS
 ===========================
 
-Your resume currently scores 29.5%. Best improvement: add natural language processing, deep learning to reach 53.3%
+Your resume currently scores 29.5%. Best improvement: add natural language processing, deep learning, mongodb to reach 55.2%
 
-Potential gain: +23.9%
+Potential gain: +25.8%
 
 Your Current Skills:
 - machine learning
 
 Improvement Scenarios:
 
-Scenario 1: Score improvement to 53.3%
+Scenario 1: Score improvement to 55.2%
 Add these skills:
 - natural language processing: building systems that understand and process human language
 - deep learning: working with neural networks and deep learning architectures
+- mongodb: working with MongoDB database
 
-Scenario 2: Score improvement to 53.3%
+Scenario 2: Score improvement to 52.2%
 Add these skills:
-- natural language processing: building systems that understand and process human language
-- deep learning: working with neural networks and deep learning architectures
+- data science: expertise in analyzing and interpreting complex data
+- ai: building artificial intelligence systems
+- sql: structured query language for database management
 
 Scenario 3: Score improvement to 51.1%
 Add these skills:
 - data science: expertise in analyzing and interpreting complex data
 - natural language processing: building systems that understand and process human language
 
-Scenario 4: Score improvement to 51.1%
+Scenario 4: Score improvement to 50.7%
 Add these skills:
-- data science: expertise in analyzing and interpreting complex data
-- natural language processing: building systems that understand and process human language
-- keras: building neural networks with Keras
+- deep learning: working with neural networks and deep learning architectures
+- pytorch: developing deep learning models with PyTorch
+- sql: structured query language for database management
 
-Scenario 5: Score improvement to 51.1%
+Scenario 5: Score improvement to 50.2%
 Add these skills:
-- data science: expertise in analyzing and interpreting complex data
-- natural language processing: building systems that understand and process human language
+- deep learning: working with neural networks and deep learning architectures
+- pytorch: developing deep learning models with PyTorch
+- nlp: processing and analyzing natural language
