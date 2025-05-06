@@ -3,33 +3,24 @@ Predicted Match Percentage: 29.5%
 COUNTERFACTUAL EXPLANATIONS
 ===========================
 
-Your resume currently scores 29.5%. Best improvement: add data science, natural language processing to reach 51.1%
+Your resume currently scores 29.5%. Best improvement: add deep learning to reach 42.6%
 
-Potential gain: +21.6%
+Potential gain: +13.1%
 
 Your Current Skills:
 - machine learning
 
 Improvement Scenarios:
 
-Scenario 1: Score improvement to 51.1%
-Add these skills:
-- data science: knowledge of data science
-- natural language processing: knowledge of natural language processing
-
-Scenario 2: Score improvement to 42.6%
+Scenario 1: Score improvement to 42.6%
 Add these skills:
 - deep learning: neural networks and deep architectures
 
-Scenario 3: Score improvement to 42.5%
-Add these skills:
-- pytorch: developing models with PyTorch
-
-Scenario 4: Score improvement to 42.0%
-Add these skills:
-- deep learning: neural networks and deep architectures
-- matplotlib: knowledge of matplotlib
-
-Scenario 5: Score improvement to 41.4%
+Scenario 2: Score improvement to 41.4%
 Add these skills:
 - data science: knowledge of data science
+
+Scenario 3: Score improvement to 41.4%
+Add these skills:
+- data science: knowledge of data science
+- logistic regression: knowledge of logistic regression

@@ -6,7 +6,7 @@ function App() {
     <div className="min-h-screen bg-gray-100 p-6">
       <ToolSelector />
     </div>
-  );
+  )
 }
 
 export default App;
