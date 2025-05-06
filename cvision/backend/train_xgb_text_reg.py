@@ -1,4 +1,4 @@
-# train_xgb_text.py
+# train_xgb_text_reg.py
 import os
 import pandas as pd
 import numpy as np
@@ -8,15 +8,12 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score
 import joblib
-import matplotlib.pyplot as plt
 
-# === Config ===
 resume_folder = "trainResumes"
 train_csv_path = "train.csv"
-model_path = "xgb_text_model.pkl"
-vectorizer_path = "tfidf_vectorizer.pkl"
+model_path = "xgb_text_model_reg.pkl"  # regression model
+vectorizer_path = "tfidf_vectorizer.pkl"  # load existing
 
-# === Load resume texts ===
 def load_resume_texts(folder_path):
     texts = {}
     for filename in os.listdir(folder_path):
@@ -34,21 +31,15 @@ df = pd.read_csv(train_csv_path)
 
 print("🔗 Merging texts with labels...")
 df["text"] = df["CandidateID"].map(resume_texts)
+df.dropna(subset=["text"], inplace=True)
 
-# Filter out samples with missing or too short texts
-df = df.dropna(subset=["text"])
-df = df[df["text"].str.len() > 100]  # Only keep meaningful resumes
+# === Load the vectorizer used for classifier ===
+print("\n📦 Loading EXISTING vectorizer...")
+vectorizer = joblib.load(vectorizer_path)
 
 # === Feature extraction ===
-vectorizer = TfidfVectorizer(
-    max_features=3000,      # 🔥 more features -> better capture of skills
-    stop_words="english",   # 🔥 removes meaningless common words
-    ngram_range=(1,2)       # 🔥 use unigrams + bigrams ("machine learning")
-)
-X = vectorizer.fit_transform(df["text"])
-y = df["Match Percentage"]
-
-print(f"📝 Dataset size after filtering: {X.shape}")
+X = vectorizer.transform(df["text"])
+y = df["Match Percentage"]  # regression target
 
 # === Train-test split ===
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -63,17 +54,10 @@ y_pred = model.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 print(f"✅ MAE: {mae:.2f}")
-print(f"✅ R^2 score: {r2:.2f}")
+print(f"✅ R^2: {r2:.2f}")
 
-# Plot real vs predicted
-plt.scatter(y_test, y_pred, alpha=0.5)
-plt.xlabel("True Match %")
-plt.ylabel("Predicted Match %")
-plt.title("True vs Predicted")
-plt.grid(True)
-plt.show()
-
-# === Save model and vectorizer ===
-print("💾 Saving model and vectorizer...")
+# === Save ONLY model ===
+print("💾 Saving regressor model...")
 joblib.dump(model, model_path)
-joblib.dump(vectorizer, vectorizer_path)
+
+# (No need to save vectorizer again!)

@@ -1,0 +1,15 @@
+Predicted Match Percentage: 42.9%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 42.9% match.
+
+No significant improvements found.
+
+Your Current Skills:
+- ai
+- mongodb
+- sql
+
+Improvement Scenarios:

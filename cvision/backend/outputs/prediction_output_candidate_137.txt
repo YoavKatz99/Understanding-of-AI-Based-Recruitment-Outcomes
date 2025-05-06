@@ -1,0 +1,45 @@
+Predicted Match Percentage: 51.1%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 51.1%. Best improvement: add data science, classification, django to reach 62.9%
+
+Potential gain: +11.8%
+
+Your Current Skills:
+- natural language processing
+- ai
+- ml
+- machine learning
+- deep learning
+- numpy
+- pandas
+- tensorflow
+- keras
+
+Improvement Scenarios:
+
+Scenario 1: Score improvement to 62.9%
+Add these skills:
+- data science: knowledge of data science
+- classification: labeling data into categories
+- django: knowledge of django
+
+Scenario 2: Score improvement to 62.2%
+Add these skills:
+- scikit learn: using scikit-learn for ML tasks
+- seaborn: knowledge of seaborn
+
+Scenario 3: Score improvement to 62.1%
+Add these skills:
+- scikit learn: using scikit-learn for ML tasks
+- seaborn: knowledge of seaborn
+- django: knowledge of django
+
+Scenario 4: Score improvement to 61.5%
+Add these skills:
+- data science: knowledge of data science
+- classification: labeling data into categories
+- rnn: knowledge of rnn
+- django: knowledge of django

@@ -1,0 +1,15 @@
+Predicted Match Percentage: 34.7%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 34.7% match.
+
+No significant improvements found.
+
+Your Current Skills:
+- ai
+- machine learning
+- numpy
+
+Improvement Scenarios:

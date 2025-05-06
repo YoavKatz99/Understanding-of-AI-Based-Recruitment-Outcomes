@@ -1,0 +1,41 @@
+Predicted Match Percentage: 100.0%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 100.0%. Best improvement: add natural language processing, classification, numpy, cnn, opencv to reach 0.0%
+
+Potential gain: -100.0%
+
+Your Current Skills:
+- ai
+- mongodb
+- sql
+
+Improvement Scenarios:
+
+Scenario 1: Score improvement to 0.0%
+Add these skills:
+- natural language processing: 
+- classification: labeling data into categories
+- numpy: 
+- cnn: 
+- opencv: 
+
+Scenario 2: Score improvement to 0.0%
+Add these skills:
+- computer vision: interpreting images and videos with computers
+- natural language processing: 
+- classification: labeling data into categories
+- numpy: 
+- tensorflow: building ML models with TensorFlow
+- django: 
+
+Scenario 3: Score improvement to 0.0%
+Add these skills:
+- computer vision: interpreting images and videos with computers
+- natural language processing: 
+- scikit learn: using scikit-learn for ML tasks
+- tensorflow: building ML models with TensorFlow
+- opencv: 
+- django: 

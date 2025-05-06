@@ -1,4 +1,4 @@
-# app.py
+# === app.py (Full version: SHAP/LIME + DiCE) ===
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
@@ -6,11 +6,11 @@ import numpy as np
 import pandas as pd
 import joblib
 from pdfminer.high_level import extract_text
-import dice_ml
-from dice_ml import Dice
 from explain_resume import run_explanation
 from explain_lime_text import run_text_lime_with_xgb
+from explain_simple_dice import generate_enhanced_explanations
 
+# === Flask Setup ===
 app = Flask(__name__)
 CORS(app)
 
@@ -19,53 +19,65 @@ OUTPUT_FOLDER = "outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# === Load Model and Vectorizer ===
-model = joblib.load("xgb_text_model.pkl")
+# === Load Models and Tools ===
+regressor_model = joblib.load("xgb_text_model_reg.pkl")
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
 feature_names = vectorizer.get_feature_names_out()
+TECH_SKILLS = joblib.load("feature_list.pkl")  # now preserved as underscores
+dice_regressor_model = joblib.load("xgb_regressor_model.pkl")  # ✅ Now it's your regressor
 
-# === Setup DiCE with Genetic Algorithm ===
-n_features = len(feature_names)
 
-# Create dummy dataframe for DiCE setup
-X_train_dummy = np.random.rand(100, n_features)
-y_train_dummy = (np.random.rand(100) > 0.5).astype(int)
+# === Setup DiCE ===
+import dice_ml
+from dice_ml import Dice
 
-df_dummy = pd.DataFrame(X_train_dummy, columns=feature_names)
-df_dummy["Match"] = y_train_dummy
+X_sample = np.array([[0.0]*len(TECH_SKILLS), [1.0]*len(TECH_SKILLS)], dtype=np.float64)
+df_dummy = pd.DataFrame(X_sample, columns=TECH_SKILLS)
+df_dummy["Match"] = [0, 1]
+feature_ranges = {skill: [0.0, 1.0] for skill in TECH_SKILLS}
 
+# Define DiCE data object
 data_dice = dice_ml.Data(
     dataframe=df_dummy,
-    continuous_features=feature_names.tolist(),
-    outcome_name="Match"
+    outcome_name="Match",
+    outcome_type="regression",  # ✅ REGRESSION
+    continuous_features=[],
+    data_description={
+        "feature_names": TECH_SKILLS,
+        "feature_types": ["numerical"] * len(TECH_SKILLS),
+        "feature_ranges": {skill: [0.0, 1.0] for skill in TECH_SKILLS}
+    }
 )
+
 
 class ModelWrapper:
-    def __init__(self, model, threshold=50):
+    def __init__(self, model):
         self.model = model
-        self.threshold = threshold
 
     def predict(self, X):
-        preds = self.model.predict(X)
-        return (preds >= self.threshold).astype(int)
+        return self.model.predict(X.astype(float))
 
-    def predict_proba(self, X):
-        preds = self.model.predict(X)
-        preds = np.clip(preds, 0, 100) / 100
-        preds_class0 = 1 - preds
-        preds_class1 = preds
-        return np.stack([preds_class0, preds_class1], axis=1)
+    def __getattr__(self, name):
+        if name == "predict_proba":
+            raise AttributeError("This model does not support predict_proba()")
+        return getattr(self.model, name)
 
 
-model_dice = dice_ml.Model(model=ModelWrapper(model, threshold=50), backend="sklearn")
-exp = Dice(
-    data_dice,
-    model_dice,
-    method="genetic"
+
+model_dice = dice_ml.Model(
+    model=ModelWrapper(dice_regressor_model),
+    backend="sklearn",
+    model_type="regressor"  # ✅ Force DiCE to treat it as a regressor
 )
 
-# === Routes ===
+dice_explainer = Dice(data_dice, model_dice, method="random")
 
+# === Manual skill extraction ===
+def extract_features(text):
+    text = text.lower()
+    return {skill: float(skill.replace("_", " ") in text) for skill in TECH_SKILLS}  # fixed matching
+
+# === Routes ===
 @app.route("/explain", methods=["POST"])
 def explain():
     try:
@@ -76,11 +88,26 @@ def explain():
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
-        result = run_explanation(filepath, tool)
+        result = run_explanation(filepath, tool, regressor_model, vectorizer)
         return jsonify(result)
 
     except Exception as e:
-        print("💥 Error in SHAP/LIME explanation:", str(e))
+        print("\U0001F4A5 Error in SHAP/LIME explanation:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/explain_lime_text", methods=["POST"])
+def explain_lime_text():
+    try:
+        file = request.files['file']
+        filename = file.filename or "temp_resume.pdf"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        result = run_text_lime_with_xgb(filepath, regressor_model, vectorizer)
+        return jsonify(result)
+
+    except Exception as e:
+        print("\U0001F4A5 Error in LIME Text explanation:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route("/explain_carla", methods=["POST"])
@@ -91,130 +118,115 @@ def explain_dice():
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
-        # === Extract text
         text = extract_text(filepath)
-        text_cleaned = text.lower()
-        features = vectorizer.transform([text_cleaned])
-        features_array = features.toarray()
+        features_dict = extract_features(text)
+        features_array = np.array([[features_dict.get(skill, 0.0) for skill in TECH_SKILLS]], dtype=np.float64)
+        query = pd.DataFrame(features_array, columns=TECH_SKILLS).clip(0.0, 1.0).astype(float)
 
-        prediction = float(model.predict(features)[0])
+        raw_pred = dice_regressor_model.predict(query)[0]
+        prediction = float(np.clip(raw_pred, 0, 1)) * 100
 
-        query_df = pd.DataFrame(features_array, columns=feature_names)
+        print("🎯 Query Input:", query.to_dict(orient="records")[0])
+        print("🔮 Prediction Score:", prediction)
 
-        # === Fix: create fresh ModelWrapper inside the function
-        class ModelWrapper:
-            def __init__(self, model, threshold=50):
-                self.model = model
-                self.threshold = threshold
+        desired_start = max((prediction / 100) + 0.1, 0.4)
+        if desired_start >= 1.0:
+            desired_start = 0.95
 
-            def predict(self, X):
-                preds = self.model.predict(X)
-                return (preds >= self.threshold).astype(int)
+        desired_range = [desired_start, 1.0]
 
-            def predict_proba(self, X):
-                preds = self.model.predict(X)
-                preds = np.clip(preds, 0, 100) / 100
-                preds_class0 = 1 - preds
-                preds_class1 = preds
-                return np.stack([preds_class0, preds_class1], axis=1)
 
-        model_dice = dice_ml.Model(model=ModelWrapper(model), backend="sklearn")
-
-        # Setup DiCE (inside route)
-        n_features = len(feature_names)
-        X_train_dummy = np.random.rand(100, n_features)
-        y_train_dummy = (np.random.rand(100) > 0.5).astype(int)
-
-        df_dummy = pd.DataFrame(X_train_dummy, columns=feature_names)
-        df_dummy["Match"] = y_train_dummy
-
-        data_dice = dice_ml.Data(
-            dataframe=df_dummy,
-            continuous_features=feature_names.tolist(),
-            outcome_name="Match"
-        )
-
-        exp = Dice(data_dice, model_dice, method="genetic")
-
-        # === Pick important features
-        nonzero_indices = np.where(features_array[0] > 0.01)[0]
-        important_features = feature_names[nonzero_indices]
-        important_features = important_features.tolist()[:30]
-
-        # === Try generating counterfactuals safely
         try:
-            cf_examples = exp.generate_counterfactuals(
-                query_df,
-                total_CFs=2,                  # Only try generating 2 counterfactuals
-                desired_class="opposite",
-                features_to_vary=important_features[:10],   # Use only top 10 important features
-                verbose=False                 # Hide ugly progress bar
+            cf_example = dice_explainer.generate_counterfactuals(
+                query,
+                total_CFs=5,
+                desired_range=desired_range,
+                features_to_vary="all"
             )
 
-        except Exception as dice_error:
-            print("⚡ DiCE failed to generate counterfactuals:", str(dice_error))
+            if not cf_example.cf_examples_list or cf_example.cf_examples_list[0].final_cfs_df.empty:
+                print("⚠️ No results with 'random', retrying with 'genetic'")
+                dice_explainer_genetic = Dice(data_dice, model_dice, method="genetic")
+                cf_example = dice_explainer_genetic.generate_counterfactuals(
+                    query,
+                    total_CFs=5,
+                    desired_range=desired_range,
+                    features_to_vary="all"
+                )
+
+        except Exception as e:
+            print("❌ DiCE failed:", str(e))
             return jsonify({
                 "prediction": round(prediction, 2),
-                "scenarios": [],
-                "error": "Could not generate counterfactuals. Try modifying the resume."
-            })
+                "output_file": None,
+                "output_text": "DiCE failed to generate counterfactual explanations.",
+                "explanations": {
+                    "summary": f"Your resume currently scores {prediction:.1f}%.",
+                    "best_suggestion": "No valid counterfactuals could be generated.",
+                    "current_skills": [],
+                    "scenarios": []
+                },
+                "counterfactuals": {}
+            }), 500
+        
+        print("🧾 RAW COUNTERFACTUALS:")
+        print(cf_example.cf_examples_list[0].final_cfs_df)
+        print("🔁 Predicted match % for each counterfactual:")
+        for i, row in cf_example.cf_examples_list[0].final_cfs_df.iterrows():
+            input_df = pd.DataFrame([row[TECH_SKILLS].values], columns=TECH_SKILLS)
+            pred = dice_regressor_model.predict(input_df)[0] * 100
+            print(f"CF {i+1}: {pred:.2f}%")
 
-        current_features = features_array[0]
 
-        # === Parse counterfactuals
-        scenarios = []
-        for idx, cf in enumerate(cf_examples.cf_examples_list[0].final_cfs_df.iterrows()):
-            cf_vector = cf[1].values
-            added_words = []
-            for i, (old_val, new_val) in enumerate(zip(current_features, cf_vector)):
-                if old_val == 0 and new_val > 0.05:
-                    word = feature_names[i]
-                    added_words.append(word)
 
-            if added_words:
-                new_score = model.predict([cf_vector])[0]
-                improvement = new_score - prediction
-                scenarios.append({
-                    "scenario": idx + 1,
-                    "added_words": added_words,
-                    "new_score": round(float(new_score), 2),
-                    "improvement": round(float(improvement), 2)
-                })
+        cf_df = cf_example.cf_examples_list[0].final_cfs_df
+        cf_df["Match"] = np.clip(cf_df["Match"] * 100, 0, 100)
+        cf_df.rename(columns={"Match": "Match Percentage"}, inplace=True)
 
-        # Sort scenarios
-        scenarios = sorted(scenarios, key=lambda x: (len(x['added_words']), -x['improvement']))
+        explanations = generate_enhanced_explanations(query, cf_example, prediction, dice_regressor_model)
+
+        output_filename = f"prediction_output_{filename.replace('.pdf', '')}.txt"
+        output_path = os.path.join(OUTPUT_FOLDER, output_filename)
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(f"Predicted Match Percentage: {prediction:.1f}%\n\n")
+            f.write("COUNTERFACTUAL EXPLANATIONS\n===========================\n\n")
+            f.write(f"{explanations['summary']}\n\n")
+            f.write(f"{explanations['best_suggestion']}\n\n")
+            f.write("Your Current Skills:\n")
+            if explanations['current_skills']:
+                for skill in explanations['current_skills']:
+                    f.write(f"- {skill}\n")
+            else:
+                f.write("- No recognized skills detected\n")
+
+            f.write("\nImprovement Scenarios:\n")
+            for i, scenario in enumerate(explanations['scenarios']):
+                f.write(f"\nScenario {i+1}: Score improvement to {scenario['new_score']:.1f}%\n")
+                f.write("Add these skills:\n")
+                for skill in scenario['added_skills']:
+                    f.write(f"- {skill['name']}: {skill['description']}\n")
+
+        with open(output_path, "r", encoding="utf-8") as f:
+            output_text = f.read()
 
         return jsonify({
             "prediction": round(prediction, 2),
-            "scenarios": scenarios
+            "output_file": output_filename,
+            "output_text": output_text,
+            "explanations": explanations,
+            "counterfactuals": cf_example.to_json()
         })
 
     except Exception as e:
-        print("💥 Error in DiCE explanation route:", str(e))
+        print("💥 Error in DiCE explanation:", str(e))
         return jsonify({"error": str(e)}), 500
 
-
-
-
-@app.route("/explain_lime_text", methods=["POST"])
-def explain_lime_text():
-    try:
-        file = request.files['file']
-        filename = file.filename or "temp_resume.pdf"
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(filepath)
-
-        result = run_text_lime_with_xgb(filepath)
-        return jsonify(result)
-
-    except Exception as e:
-        print("💥 Error in LIME Text explanation:", str(e))
-        return jsonify({"error": str(e)}), 500
 
 @app.route("/outputs/<path:filename>")
 def outputs(filename):
     return send_from_directory(OUTPUT_FOLDER, filename)
 
 if __name__ == "__main__":
-    print("🚦 Service is running on http://127.0.0.1:5000/")
+    print("\U0001F6A6 Service is running on http://127.0.0.1:5000/")
     app.run(debug=True)

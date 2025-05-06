@@ -3,40 +3,33 @@ Predicted Match Percentage: 29.5%
 COUNTERFACTUAL EXPLANATIONS
 ===========================
 
-Your resume currently scores 29.5%. Best improvement: add natural language processing, deep learning, mongodb to reach 55.2%
+Your resume currently scores 29.5%. Best improvement: add data science, natural language processing to reach 51.1%
 
-Potential gain: +25.8%
+Potential gain: +21.6%
 
 Your Current Skills:
 - machine learning
 
 Improvement Scenarios:
 
-Scenario 1: Score improvement to 55.2%
+Scenario 1: Score improvement to 51.1%
 Add these skills:
-- natural language processing: building systems that understand and process human language
-- deep learning: working with neural networks and deep learning architectures
-- mongodb: working with MongoDB database
+- data science: knowledge of data science
+- natural language processing: knowledge of natural language processing
 
-Scenario 2: Score improvement to 52.2%
+Scenario 2: Score improvement to 42.6%
 Add these skills:
-- data science: expertise in analyzing and interpreting complex data
-- ai: building artificial intelligence systems
-- sql: structured query language for database management
+- deep learning: neural networks and deep architectures
 
-Scenario 3: Score improvement to 51.1%
+Scenario 3: Score improvement to 42.5%
 Add these skills:
-- data science: expertise in analyzing and interpreting complex data
-- natural language processing: building systems that understand and process human language
+- pytorch: developing models with PyTorch
 
-Scenario 4: Score improvement to 50.7%
+Scenario 4: Score improvement to 42.0%
 Add these skills:
-- deep learning: working with neural networks and deep learning architectures
-- pytorch: developing deep learning models with PyTorch
-- sql: structured query language for database management
+- deep learning: neural networks and deep architectures
+- matplotlib: knowledge of matplotlib
 
-Scenario 5: Score improvement to 50.2%
+Scenario 5: Score improvement to 41.4%
 Add these skills:
-- deep learning: working with neural networks and deep learning architectures
-- pytorch: developing deep learning models with PyTorch
-- nlp: processing and analyzing natural language
+- data science: knowledge of data science

@@ -1,0 +1,35 @@
+Predicted Match Percentage: 41.9%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 41.9%. Best improvement: add data science, seaborn to reach 57.2%
+
+Potential gain: +15.2%
+
+Your Current Skills:
+- ai
+- machine learning
+- mongodb
+- sql
+
+Improvement Scenarios:
+
+Scenario 1: Score improvement to 57.2%
+Add these skills:
+- data science: knowledge of data science
+- seaborn: knowledge of seaborn
+
+Scenario 2: Score improvement to 53.5%
+Add these skills:
+- data science: knowledge of data science
+
+Scenario 3: Score improvement to 52.4%
+Add these skills:
+- data science: knowledge of data science
+- deep learning: neural networks and deep architectures
+
+Scenario 4: Score improvement to 51.9%
+Add these skills:
+- natural language processing: knowledge of natural language processing
+- rnn: knowledge of rnn
