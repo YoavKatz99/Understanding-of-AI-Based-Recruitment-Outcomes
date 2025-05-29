@@ -23,10 +23,40 @@ def run_text_lime_with_xgb(filepath, model, vectorizer):
         num_features=10
     )
 
+    html_content = exp.as_html()
+
+    # ✅ Fix spacing by replacing white-space
+    html_content = html_content.replace("white-space: pre-wrap;", "white-space: normal;")
+
+    # ✅ Add iframe resizing support
+    resize_script = """
+    <script>
+    window.onload = function () {
+        setTimeout(function () {
+        const height = document.body.scrollHeight;
+        console.log("📏 iframe sending height:", height);
+        window.parent.postMessage({ height: height }, "*");
+        }, 500);
+    };
+    </script>
+    <style>
+    body { margin: 0; padding: 20px; overflow: hidden; }
+    .lime_text_div { max-height: none !important; overflow: visible !important; }
+    </style>
+    """
+
+
+    # ✅ Inject before </body>
+    if "</body>" in html_content:
+        html_content = html_content.replace("</body>", resize_script + "</body>")
+    else:
+        html_content += resize_script
+
     output_dir = "outputs"
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, "lime_text_explanation.html")
-    exp.save_to_file(output_path)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
 
     prediction_score = predict_fn([text])[0][1] * 100
 

@@ -1,6 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function ToolSelector() {
+  useEffect(() => {
+  const handleResize = (event) => {
+    if (event.origin.includes("127.0.0.1")) {
+      const iframe = document.querySelector("iframe");
+      if (iframe && event.data.height) {
+        iframe.style.height = event.data.height + "px";
+      }
+    }
+  };
+
+  window.addEventListener("message", handleResize);
+  return () => window.removeEventListener("message", handleResize);
+}, []);
+
+
+  
   const [tool, setTool] = useState("shap");
   const [file, setFile] = useState(null);
   const [score, setScore] = useState(null);
@@ -169,78 +185,7 @@ export default function ToolSelector() {
           </p>
         )}
 
-        {score !== null && (
-          <div className="bg-white rounded-2xl shadow-xl p-10">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-800">Match Score</h2>
-              <p className="text-6xl font-extrabold text-indigo-600 mt-2">
-                {score.toFixed(2)}%
-              </p>
-              <p className="mt-4 text-gray-600">
-                This score reflects how well the resume aligns with the job
-                requirements based on extracted skills.
-              </p>
-            </div>
-
-            <div className="mt-12 grid md:grid-cols-2 gap-8">
-              {tool === "shap" && resultFile && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                    SHAP Feature Importance
-                  </h3>
-                  <img
-                    src={`http://127.0.0.1:5000/outputs/${resultFile}`}
-                    alt="SHAP Importance"
-                    className="rounded-xl border w-full"
-                  />
-                </div>
-              )}
-
-              {tool === "lime_text" && resultFile && (
-                <div className="mt-8">
-                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                    LIME Explanation
-                  </h3>
-                  <div className="w-full min-h-[800px]">
-                    <iframe
-                      src={`http://127.0.0.1:5000/outputs/${resultFile}`}
-                      title="LIME Explanation"
-                      className="w-full h-[800px] border rounded-xl shadow"
-                      style={{ width: "50%", height: "350px", border: "1px solid #ccc", borderRadius: "1rem" }}
-
-                    />
-                  </div>
-                </div>
-              )}
-
-              {tool === "dice" && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
-                    DiCE Explanation
-                  </h3>
-                  {outputText ? (
-                    <div className="p-4 border rounded bg-white text-black">
-                      <div className="font-mono whitespace-pre-wrap">
-                        {renderDiceOutput(outputText)}
-                      </div>
-                    </div>
-                  ) : resultFile ? (
-                    <div>
-                      <p>Download the explanation:</p>
-                      <a
-                        href={`http://127.0.0.1:5000/outputs/${resultFile}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        View explanation file
-                      </a>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-
-              <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
+        <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
                 <h4 className="text-lg font-semibold text-indigo-700 mb-2">
                   Interpretation Tips
                 </h4>
@@ -263,6 +208,88 @@ export default function ToolSelector() {
                   </li>
                 </ul>
               </div>
+
+        {score !== null && (
+          <div className="bg-white rounded-2xl shadow-xl p-10">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800">Match Score</h2>
+              <p className="text-6xl font-extrabold text-indigo-600 mt-2">
+                {score.toFixed(2)}%
+              </p>
+              <p className="mt-4 text-gray-600">
+                This score reflects how well the resume aligns with the job
+                requirements based on extracted skills.
+              </p>
+            </div>
+
+            <div className="mt-12 grid md:grid-cols-2 gap-8">
+              {tool === "shap" && resultFile && (
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    SHAP Feature Importance
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+  This is global feature importance plot, where the global importance of each feature is taken to be the mean absolute value for that feature over all the given samples.
+</p>
+                  <img
+                    src={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                    alt="SHAP Importance"
+                    className="rounded-xl border w-full"
+                  />
+                </div>
+              )}
+
+              {tool === "lime_text" && resultFile && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    LIME Explanation
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+  This explanation highlights key words in your resume and shows whether they positively or negatively affected your match score. Words are color-coded: orange means a positive effect, blue means negative.
+</p>
+                  <div className="w-full min-h-[800px]">
+                    <iframe
+                      src={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                      title="LIME Explanation"
+                      className="w-full h-[800px] border rounded-xl shadow"
+                      style={{ width: "110%", height: "450px", border: "1px solid #ccc", borderRadius: "1rem" }}
+
+                    />
+                  </div>
+                </div>
+              )}
+
+              {tool === "dice" && (
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    DiCE Explanation
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+  These suggestions show how your resume could be changed to receive a higher score. Each scenario lists specific changes (like adding skills or modifying terms) that would improve your match percentage.
+</p>
+                  {outputText ? (
+                    <div className="p-4 border rounded bg-white text-black">
+                      <div className="font-mono whitespace-pre-wrap">
+                        {renderDiceOutput(outputText)}
+                      </div>
+                    </div>
+                  ) : resultFile ? (
+                    <div>
+                      <p>Download the explanation:</p>
+                      <a
+                        href={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        View explanation file
+                      </a>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              
             </div>
           </div>
         )}

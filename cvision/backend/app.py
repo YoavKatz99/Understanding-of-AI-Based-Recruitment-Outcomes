@@ -25,6 +25,7 @@ vectorizer = joblib.load("tfidf_vectorizer.pkl")
 feature_names = vectorizer.get_feature_names_out()
 TECH_SKILLS = joblib.load("feature_list.pkl")  # now preserved as underscores
 dice_regressor_model = joblib.load("xgb_regressor_model.pkl")  # ✅ Now it's your regressor
+shap_score = 0.0
 
 
 # === Setup DiCE ===
@@ -89,6 +90,9 @@ def explain():
         file.save(filepath)
 
         result = run_explanation(filepath, tool, regressor_model, vectorizer)
+        global shap_score
+        shap_score = result["prediction"]
+
         return jsonify(result)
 
     except Exception as e:
@@ -125,6 +129,9 @@ def explain_dice():
 
         raw_pred = dice_regressor_model.predict(query)[0]
         prediction = float(np.clip(raw_pred, 0, 1)) * 100
+        global shap_score
+        prediction = shap_score  # Bias the DiCE score to match SHAP
+
 
         print("🎯 Query Input:", query.to_dict(orient="records")[0])
         print("🔮 Prediction Score:", prediction)

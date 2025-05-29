@@ -1,26 +1,40 @@
-Predicted Match Percentage: 29.5%
+Predicted Match Percentage: 52.4%
 
 COUNTERFACTUAL EXPLANATIONS
 ===========================
 
-Your resume currently scores 29.5%. Best improvement: add deep learning to reach 42.6%
+Your resume currently scores 52.4%. Best improvement: add ml, deep learning, scikit learn, seaborn, pytorch to reach 62.9%
 
-Potential gain: +13.1%
+Potential gain: +10.4%
 
 Your Current Skills:
 - machine learning
 
 Improvement Scenarios:
 
-Scenario 1: Score improvement to 42.6%
+Scenario 1: Score improvement to 62.9%
 Add these skills:
+- ml: knowledge of ml
 - deep learning: neural networks and deep architectures
+- scikit learn: using scikit-learn for ML tasks
+- seaborn: knowledge of seaborn
+- pytorch: developing models with PyTorch
 
-Scenario 2: Score improvement to 41.4%
+Scenario 2: Score improvement to 62.9%
 Add these skills:
-- data science: knowledge of data science
+- computer vision: interpreting images and videos with computers
+- ml: knowledge of ml
+- deep learning: neural networks and deep architectures
+- scikit learn: using scikit-learn for ML tasks
+- seaborn: knowledge of seaborn
+- pytorch: developing models with PyTorch
 
-Scenario 3: Score improvement to 41.4%
+Scenario 3: Score improvement to 62.8%
 Add these skills:
-- data science: knowledge of data science
-- logistic regression: knowledge of logistic regression
+- computer vision: interpreting images and videos with computers
+- natural language processing: knowledge of natural language processing
+- deep learning: neural networks and deep architectures
+- seaborn: knowledge of seaborn
+- keras: neural network modeling using Keras
+- pytorch: developing models with PyTorch
+- rnn: knowledge of rnn
