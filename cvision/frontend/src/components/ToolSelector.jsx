@@ -35,6 +35,11 @@ export default function ToolSelector() {
   };
 
   const handleSubmit = async () => {
+     const apiBase = process.env.REACT_APP_API_BASE_URL;
+      console.log("🔍 API Base:", apiBase);
+      console.log("🔍 Selected tool:", tool);
+
+
     if (!file) {
       alert("Please select a file.");
       return;
@@ -44,7 +49,6 @@ export default function ToolSelector() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("tool", tool);
-    const apiBase = process.env.REACT_APP_API_BASE_URL;
 
     let endpoint = `${apiBase}/explain`;
     if (tool === "dice") {
@@ -52,13 +56,16 @@ export default function ToolSelector() {
     } else if (tool === "lime_text") {
       endpoint = `${apiBase}/explain_lime_text`;
     }
-
+  console.log("🚀 Final endpoint:", endpoint);
+  console.log("📋 FormData contents:");
     try {
+        console.log("📡 Making POST request...");
       const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });
-
+      console.log("📥 Response status:", response.status);
+      console.log("📥 Response headers:", response.headers);
       const result = await response.json();
       console.log("Server result:", result);
 
