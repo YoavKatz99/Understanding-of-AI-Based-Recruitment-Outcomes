@@ -1,0 +1,33 @@
+Predicted Match Percentage: 47.8%
+
+COUNTERFACTUAL EXPLANATIONS
+===========================
+
+Your resume currently scores 47.8%. Best improvement: add ai to reach 59.7%
+
+Potential gain: +11.8%
+
+Your Current Skills:
+- data science
+- computer vision
+- natural language processing
+- machine learning
+- deep learning
+- scikit learn
+- pandas
+- matplotlib
+- tensorflow
+- keras
+- opencv
+- django
+- mongodb
+
+Improvement Scenarios:
+
+Scenario 1: Score improvement to 59.7%
+Add these skills:
+- ai: knowledge of ai
+
+Scenario 2: Score improvement to 58.5%
+Add these skills:
+- pytorch: developing models with PyTorch

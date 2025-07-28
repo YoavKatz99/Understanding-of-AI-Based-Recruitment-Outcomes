@@ -60,7 +60,16 @@ def run_text_lime_with_xgb(filepath, model, vectorizer):
 
     prediction_score = predict_fn([text])[0][1] * 100
 
+    # ✅ Extract top features as text
+    top_features = exp.as_list()
+    explanation_text = "Top LIME features:\\n" + "\\n".join(
+        [f"{word}: {weight:.4f}" for word, weight in top_features[:5]]
+    )
+
+
     return {
         "prediction": round(float(prediction_score), 2),
-        "output_file": "lime_text_explanation.html"
+        "output_file": "lime_text_explanation.html",
+        "explanation": explanation_text
     }
+

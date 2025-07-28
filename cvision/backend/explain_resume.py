@@ -3,6 +3,8 @@ import shap
 import numpy as np
 import pandas as pd
 import spacy
+import matplotlib
+matplotlib.use('Agg')  # Use a non-GUI backend suitable for servers
 import matplotlib.pyplot as plt
 
 from pdfminer.high_level import extract_text
@@ -56,6 +58,17 @@ def run_explanation(filepath, tool, model, vectorizer):
         plt.clf()
 
         print(f"📊 SHAP global bar plot saved to {shap_plot_path}")
+        # Extract top 5 impactful features
+        top_indices = np.argsort(np.abs(shap_values[0]))[::-1][:5]
+        top_features = [(feature_names[i], shap_values[0][i]) for i in top_indices]
+
+        explanation_text = "Top SHAP features:\n" + "\n".join(
+            [f"{name}: {value:.4f}" for name, value in top_features]
+        )
 
 
-    return {"prediction": round(float(prediction), 2)}
+
+    return {
+        "prediction": round(float(prediction), 2),
+        "explanation": explanation_text
+    }
