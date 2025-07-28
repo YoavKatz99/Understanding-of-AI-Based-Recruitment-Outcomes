@@ -25,6 +25,7 @@ export default function ToolSelector() {
   const [loading, setLoading] = useState(false);
   const [outputText, setOutputText] = useState(null);
   const [highlightedWords, setHighlightedWords] = useState([]);
+  const apiBase =  "https://understanding-of-ai-based-recruitment.onrender.com";
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -35,7 +36,6 @@ export default function ToolSelector() {
   };
 
   const handleSubmit = async () => {
-     const apiBase =  "https://understanding-of-ai-based-recruitment.onrender.com";
       console.log("🔍 API Base:", apiBase);
       console.log("🔍 Selected tool:", tool);
 
