@@ -222,11 +222,13 @@ export default function ToolSelector() {
                   <p className="text-sm text-gray-600 mb-4">
                     This explanation highlights key words in your resume and shows whether they positively or negatively affected your match score. Words are color-coded: orange means a positive effect, blue means negative.
                   </p>
-                  <div className="w-full">
+                 <div className="w-full min-h-[800px]">
                     <iframe
                       src={`${apiBase}/outputs/${resultFile}`}
                       title="LIME Explanation"
-                      className="w-full h-[600px] border rounded-xl shadow"
+                      className="w-full h-[800px] border rounded-xl shadow"
+                      style={{ width: "110%", height: "450px", border: "1px solid #ccc", borderRadius: "1rem" }}
+
                     />
                   </div>
                 </div>
