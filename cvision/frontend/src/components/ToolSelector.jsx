@@ -35,7 +35,7 @@ export default function ToolSelector() {
   };
 
   const handleSubmit = async () => {
-     const apiBase = process.env.REACT_APP_API_BASE_URL;
+     const apiBase =  "https://understanding-of-ai-based-recruitment.onrender.com";
       console.log("🔍 API Base:", apiBase);
       console.log("🔍 Selected tool:", tool);
 
