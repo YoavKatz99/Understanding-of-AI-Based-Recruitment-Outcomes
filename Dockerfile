@@ -9,7 +9,7 @@ COPY cvision/backend/ /app/
 
 # Install Python packages
 RUN pip install --upgrade pip
-RUN pip install flask shap lime dice-ml xgboost scikit-learn matplotlib numpy pandas pdfminer.six spacy joblib
+RUN pip install flask flask-cors shap lime dice-ml xgboost scikit-learn matplotlib numpy pandas pdfminer.six spacy joblib
 
 # Optional: Download spaCy model
 RUN python -m spacy download en_core_web_sm
