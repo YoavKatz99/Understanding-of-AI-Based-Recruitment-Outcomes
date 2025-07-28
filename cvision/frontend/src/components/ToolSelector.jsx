@@ -2,21 +2,19 @@ import React, { useState, useEffect } from "react";
 
 export default function ToolSelector() {
   useEffect(() => {
-  const handleResize = (event) => {
-    if (event.origin.includes("127.0.0.1")) {
-      const iframe = document.querySelector("iframe");
-      if (iframe && event.data.height) {
-        iframe.style.height = event.data.height + "px";
+    const handleResize = (event) => {
+      if (event.origin.includes("127.0.0.1")) {
+        const iframe = document.querySelector("iframe");
+        if (iframe && event.data.height) {
+          iframe.style.height = event.data.height + "px";
+        }
       }
-    }
-  };
+    };
 
-  window.addEventListener("message", handleResize);
-  return () => window.removeEventListener("message", handleResize);
-}, []);
+    window.addEventListener("message", handleResize);
+    return () => window.removeEventListener("message", handleResize);
+  }, []);
 
-
-  
   const [tool, setTool] = useState("shap");
   const [file, setFile] = useState(null);
   const [score, setScore] = useState(null);
@@ -25,7 +23,10 @@ export default function ToolSelector() {
   const [loading, setLoading] = useState(false);
   const [outputText, setOutputText] = useState(null);
   const [highlightedWords, setHighlightedWords] = useState([]);
-  const apiBase =  "https://understanding-of-ai-based-recruitment.onrender.com";
+  
+  // Define API base at component level so it's available everywhere
+  const apiBase = process.env.REACT_APP_API_BASE_URL || 
+                 "https://understanding-of-ai-based-recruitment.onrender.com";
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -36,10 +37,6 @@ export default function ToolSelector() {
   };
 
   const handleSubmit = async () => {
-      console.log("🔍 API Base:", apiBase);
-      console.log("🔍 Selected tool:", tool);
-
-
     if (!file) {
       alert("Please select a file.");
       return;
@@ -56,18 +53,14 @@ export default function ToolSelector() {
     } else if (tool === "lime_text") {
       endpoint = `${apiBase}/explain_lime_text`;
     }
-  console.log("🚀 Final endpoint:", endpoint);
-  console.log("📋 FormData contents:");
+
     try {
-        console.log("📡 Making POST request...");
       const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });
-      console.log("📥 Response status:", response.status);
-      console.log("📥 Response headers:", response.headers);
+
       const result = await response.json();
-      console.log("Server result:", result);
 
       if (response.ok && typeof result.prediction === "number") {
         setScore(result.prediction);
@@ -129,31 +122,6 @@ export default function ToolSelector() {
     });
   };
 
-  const highlightResumeText = (text, highlights) => {
-    if (!text) return "";
-
-    return text.split(/\s+/).map((word, i) => {
-      const match = highlights.find((hw) =>
-        word.toLowerCase().includes(hw.word)
-      );
-      if (match) {
-        const weight = match.weight;
-        const bgColor = weight > 0 ? "bg-green-200" : "bg-red-200";
-        return (
-          <span key={i} className={`${bgColor} px-1 rounded mx-0.5`}>
-            {word}
-          </span>
-        );
-      } else {
-        return (
-          <span key={i} className="mx-0.5">
-            {word}{" "}
-          </span>
-        );
-      }
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
@@ -193,31 +161,31 @@ export default function ToolSelector() {
         )}
 
         <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
-                <h4 className="text-lg font-semibold text-indigo-700 mb-2">
-                  Interpretation Tips
-                </h4>
-                <ul className="text-gray-600 list-disc pl-6 space-y-1 text-sm">
-                  <li>
-                    <strong>SHAP</strong>: shows which features (skills) pushed
-                    the score up or down.
-                  </li>
-                  <li>
-                    <strong>LIME</strong>: visualizes how individual features
-                    contributed to this specific prediction.
-                  </li>
-                  <li>
-                    <strong>DiCE</strong>: suggests which skills to add to
-                    improve your score.
-                  </li>
-                  <li>
-                    Use insights to improve the resume (e.g., add missing
-                    keywords).
-                  </li>
-                </ul>
-              </div>
+          <h4 className="text-lg font-semibold text-indigo-700 mb-2">
+            Interpretation Tips
+          </h4>
+          <ul className="text-gray-600 list-disc pl-6 space-y-1 text-sm">
+            <li>
+              <strong>SHAP</strong>: shows which features (skills) pushed
+              the score up or down.
+            </li>
+            <li>
+              <strong>LIME</strong>: visualizes how individual features
+              contributed to this specific prediction.
+            </li>
+            <li>
+              <strong>DiCE</strong>: suggests which skills to add to
+              improve your score.
+            </li>
+            <li>
+              Use insights to improve the resume (e.g., add missing
+              keywords).
+            </li>
+          </ul>
+        </div>
 
         {score !== null && (
-          <div className="bg-white rounded-2xl shadow-xl p-10">
+          <div className="bg-white rounded-2xl shadow-xl p-10 mt-8">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-800">Match Score</h2>
               <p className="text-6xl font-extrabold text-indigo-600 mt-2">
@@ -229,15 +197,15 @@ export default function ToolSelector() {
               </p>
             </div>
 
-            <div className="mt-12 grid md:grid-cols-2 gap-8">
+            <div className="mt-12 grid md:grid-cols-1 gap-8">
               {tool === "shap" && resultFile && (
                 <div>
                   <h3 className="text-xl font-semibold text-gray-700 mb-3">
                     SHAP Feature Importance
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-  This is global feature importance plot, where the global importance of each feature is taken to be the mean absolute value for that feature over all the given samples.
-</p>
+                    This is global feature importance plot, where the global importance of each feature is taken to be the mean absolute value for that feature over all the given samples.
+                  </p>
                   <img
                     src={`${apiBase}/outputs/${resultFile}`}
                     alt="SHAP Importance"
@@ -247,20 +215,18 @@ export default function ToolSelector() {
               )}
 
               {tool === "lime_text" && resultFile && (
-                <div className="mt-8">
+                <div>
                   <h3 className="text-xl font-semibold text-gray-700 mb-3">
                     LIME Explanation
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-  This explanation highlights key words in your resume and shows whether they positively or negatively affected your match score. Words are color-coded: orange means a positive effect, blue means negative.
-</p>
-                  <div className="w-full min-h-[800px]">
+                    This explanation highlights key words in your resume and shows whether they positively or negatively affected your match score. Words are color-coded: orange means a positive effect, blue means negative.
+                  </p>
+                  <div className="w-full">
                     <iframe
                       src={`${apiBase}/outputs/${resultFile}`}
                       title="LIME Explanation"
-                      className="w-full h-[800px] border rounded-xl shadow"
-                      style={{ width: "110%", height: "450px", border: "1px solid #ccc", borderRadius: "1rem" }}
-
+                      className="w-full h-[600px] border rounded-xl shadow"
                     />
                   </div>
                 </div>
@@ -272,8 +238,8 @@ export default function ToolSelector() {
                     DiCE Explanation
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-  These suggestions show how your resume could be changed to receive a higher score. Each scenario lists specific changes (like adding skills or modifying terms) that would improve your match percentage.
-</p>
+                    These suggestions show how your resume could be changed to receive a higher score. Each scenario lists specific changes (like adding skills or modifying terms) that would improve your match percentage.
+                  </p>
                   {outputText ? (
                     <div className="p-4 border rounded bg-white text-black">
                       <div className="font-mono whitespace-pre-wrap">
@@ -295,8 +261,6 @@ export default function ToolSelector() {
                   ) : null}
                 </div>
               )}
-
-              
             </div>
           </div>
         )}
