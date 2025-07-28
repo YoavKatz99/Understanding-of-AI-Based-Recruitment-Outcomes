@@ -44,13 +44,13 @@ export default function ToolSelector() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("tool", tool);
+    const apiBase = process.env.REACT_APP_API_BASE_URL;
 
-    let endpoint = "http://127.0.0.1:5000/explain";
-
+    let endpoint = `${apiBase}/explain`;
     if (tool === "dice") {
-      endpoint = "http://127.0.0.1:5000/explain_carla";
+      endpoint = `${apiBase}/explain_carla`;
     } else if (tool === "lime_text") {
-      endpoint = "http://127.0.0.1:5000/explain_lime_text";
+      endpoint = `${apiBase}/explain_lime_text`;
     }
 
     try {
@@ -232,7 +232,7 @@ export default function ToolSelector() {
   This is global feature importance plot, where the global importance of each feature is taken to be the mean absolute value for that feature over all the given samples.
 </p>
                   <img
-                    src={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                    src={`${apiBase}/outputs/${resultFile}`}
                     alt="SHAP Importance"
                     className="rounded-xl border w-full"
                   />
@@ -249,7 +249,7 @@ export default function ToolSelector() {
 </p>
                   <div className="w-full min-h-[800px]">
                     <iframe
-                      src={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                      src={`${apiBase}/outputs/${resultFile}`}
                       title="LIME Explanation"
                       className="w-full h-[800px] border rounded-xl shadow"
                       style={{ width: "110%", height: "450px", border: "1px solid #ccc", borderRadius: "1rem" }}
@@ -277,7 +277,7 @@ export default function ToolSelector() {
                     <div>
                       <p>Download the explanation:</p>
                       <a
-                        href={`http://127.0.0.1:5000/outputs/${resultFile}`}
+                        href={`${apiBase}/outputs/${resultFile}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 underline"
