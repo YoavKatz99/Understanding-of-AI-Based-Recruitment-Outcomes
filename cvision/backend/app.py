@@ -236,4 +236,5 @@ def outputs(filename):
 
 if __name__ == "__main__":
     print("\U0001F6A6 Service is running on http://127.0.0.1:5000/")
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
+
